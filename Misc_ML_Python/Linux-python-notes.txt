@@ -1,0 +1,808 @@
+# Add Linux disk to VMware
+https://www.techrepublic.com/blog/smb-technologist/extending-partitions-on-linux-vmware-virtual-machines/
+https://kb.vmware.com/s/article/1006371
+https://www.debiantutorials.com/add-a-second-hard-disk/
+Caution: VMware recommends to take a complete backup of the virtual machine prior to making these changes.
+Power off the virtual machine.
+Edit the virtual machine settings and extend the virtual disk size. For more information, see Increasing the size of a virtual disk (1004047).
+Power on the virtual machine.
+Identify the device name, which is by default /dev/sda, and confirm the new size by running the command:
+
+# fdisk -l
+
+Create a new primary partition:
+Run the command:
+
+# fdisk /dev/sda (depending the results of the step 4)
+Press p to print the partition table to identify the number of partitions. By default, there are 2: sda1 and sda2.
+Press n to create a new primary partition.
+Press p for primary.
+Press 3 for the partition number, depending on the output of the partition table print.
+Press Enter two times.
+Press t to change the system's partition ID.
+Press 3 to select the newly creation partition.
+Type 8e to change the Hex Code of the partition for Linux LVM.
+Press w to write the changes to the partition table.
+
+Restart the virtual machine.
+Run this command to verify that the changes were saved to the partition table and that the new partition has an 8e type:
+
+# fdisk -l
+
+mkfs.ext3 /dev/sda3
+mkdir /export
+mount -t ext3 /dev/sda3 /export
+
+add to /etc/fstab
+
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# / was on /dev/sda1 during installation
+UUID=92988e82-edcd-4148-980a-dca7d4efdce5 /               ext4    errors=remount-ro 0       1
+# swap was on /dev/sda5 during installation
+UUID=a6a1d6c9-bc71-4be5-908d-2f466358f14e none            swap    sw              0       0
+/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+/dev/sda3       /export ext3    defaults, errors=remount-ro 0 1
+
+
+
+
+
+Nano -w /etc/apt/sources.lilst
+
+deb http://deb.debian.org/debian stretch main
+
+deb-src http://deb.debian.org/debian stretch main
+
+ 
+
+deb http://deb.debian.org/debian stretch-updates main
+
+deb-src http://deb.debian.org/debian stretch-updates main
+
+ 
+
+deb http://security.debian.org/debian-security/ stretch/updates main
+
+deb-src http://security.debian.org/debian-security/ stretch/updates main
+
+
+# NOTE: can use sudo apt install git-all (example)
+
+apt-get update
+
+apt-get install sudo -y
+
+apt-get install git-all
+
+apt-get install automake
+
+apt-get install libtool
+
+chmod o+w /usr/local/lib /usr/local/include
+
+mkdir /usr/local/share/doc
+
+chmod o+w /usr/local/share/doc
+
+ 
+
+ 
+
+mkdir -p scada/src
+
+git clone git://github.com/stephane/libmodbus
+
+./autogen.sh
+
+./configure && make install
+
+ 
+
+https://github.com/stephane/libmodbus/tree/master/tests
+
+apt-get install build-essential 
+apt-get install openssh-server
+
+apt-get install net-tools
+
+ 
+
+ 
+
+dev@debian:~/scada/src/libmodbus$ ./autogen.sh
+
+libtoolize: putting auxiliary files in AC_CONFIG_AUX_DIR, 'build-aux'.
+
+libtoolize: linking file 'build-aux/ltmain.sh'
+
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'm4'.
+
+libtoolize: linking file 'm4/libtool.m4'
+
+libtoolize: linking file 'm4/ltoptions.m4'
+
+libtoolize: linking file 'm4/ltsugar.m4'
+
+libtoolize: linking file 'm4/ltversion.m4'
+
+libtoolize: linking file 'm4/lt~obsolete.m4'
+
+configure.ac:33: installing 'build-aux/compile'
+
+configure.ac:56: installing 'build-aux/config.guess'
+
+configure.ac:56: installing 'build-aux/config.sub'
+
+configure.ac:32: installing 'build-aux/install-sh'
+
+configure.ac:32: installing 'build-aux/missing'
+
+src/Makefile.am: installing 'build-aux/depcomp'
+
+parallel-tests: installing 'build-aux/test-driver'
+
+ 
+
+------------------------------------------------------
+
+Initialized build system. You can now run ./configure
+
+ 
+
+ 
+
+dev@debian:~/scada/src/libmodbus$ ./configure && make install
+
+checking for a BSD-compatible install... /usr/bin/install -c
+
+checking whether build environment is sane... yes
+
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+
+checking for gawk... gawk
+
+checking whether make sets $(MAKE)... yes
+
+checking whether make supports nested variables... yes
+
+checking how to create a pax tar archive... gnutar
+
+checking for style of include used by make... GNU
+
+checking for gcc... gcc
+
+checking whether the C compiler works... yes
+
+checking for C compiler default output file name... a.out
+
+checking for suffix of executables...
+
+checking whether we are cross compiling... no
+
+checking for suffix of object files... o
+
+checking whether we are using the GNU C compiler... yes
+
+checking whether gcc accepts -g... yes
+
+checking for gcc option to accept ISO C89... none needed
+
+checking whether gcc understands -c and -o together... yes
+
+checking dependency style of gcc... gcc3
+
+checking for gcc option to accept ISO C99... none needed
+
+checking for gcc option to accept ISO Standard C... (cached) none needed
+
+checking how to run the C preprocessor... gcc -E
+
+checking for grep that handles long lines and -e... /bin/grep
+
+checking for egrep... /bin/grep -E
+
+checking for ANSI C header files... yes
+
+checking for sys/types.h... yes
+
+checking for sys/stat.h... yes
+
+checking for stdlib.h... yes
+
+checking for string.h... yes
+
+checking for memory.h... yes
+
+checking for strings.h... yes
+
+checking for inttypes.h... yes
+
+checking for stdint.h... yes
+
+checking for unistd.h... yes
+
+checking minix/config.h usability... no
+
+checking minix/config.h presence... no
+
+checking for minix/config.h... no
+
+checking whether it is safe to define __EXTENSIONS__... yes
+
+checking for special C compiler options needed for large files... no
+
+checking for _FILE_OFFSET_BITS value needed for large files... no
+
+checking whether make supports nested variables... (cached) yes
+
+checking build system type... x86_64-pc-linux-gnu
+
+checking host system type... x86_64-pc-linux-gnu
+
+checking how to print strings... printf
+
+checking for a sed that does not truncate output... /bin/sed
+
+checking for fgrep... /bin/grep -F
+
+checking for ld used by gcc... /usr/bin/ld
+
+checking if the linker (/usr/bin/ld) is GNU ld... yes
+
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm -B
+
+checking the name lister (/usr/bin/nm -B) interface... BSD nm
+
+checking whether ln -s works... yes
+
+checking the maximum length of command line arguments... 1572864
+
+checking how to convert x86_64-pc-linux-gnu file names to x86_64-pc-linux-gnu format... func_convert_file_noop
+
+checking how to convert x86_64-pc-linux-gnu file names to toolchain format... func_convert_file_noop
+
+checking for /usr/bin/ld option to reload object files... -r
+
+checking for objdump... objdump
+
+checking how to recognize dependent libraries... pass_all
+
+checking for dlltool... no
+
+checking how to associate runtime and link libraries... printf %s\n
+
+checking for ar... ar
+
+checking for archiver @FILE support... @
+
+checking for strip... strip
+
+checking for ranlib... ranlib
+
+checking command to parse /usr/bin/nm -B output from gcc object... ok
+
+checking for sysroot... no
+
+checking for a working dd... /bin/dd
+
+checking how to truncate binary pipes... /bin/dd bs=4096 count=1
+
+checking for mt... mt
+
+checking if mt is a manifest tool... no
+
+checking for dlfcn.h... yes
+
+checking for objdir... .libs
+
+checking if gcc supports -fno-rtti -fno-exceptions... no
+
+checking for gcc option to produce PIC... -fPIC -DPIC
+
+checking if gcc PIC flag -fPIC -DPIC works... yes
+
+checking if gcc static flag -static works... yes
+
+checking if gcc supports -c -o file.o... yes
+
+checking if gcc supports -c -o file.o... (cached) yes
+
+checking whether the gcc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries... yes
+
+checking whether -lc should be explicitly linked in... no
+
+checking dynamic linker characteristics... GNU/Linux ld.so
+
+checking how to hardcode library paths into programs... immediate
+
+checking whether stripping libraries is possible... yes
+
+checking if libtool supports shared libraries... yes
+
+checking whether to build shared libraries... yes
+
+checking whether to build static libraries... no
+
+checking arpa/inet.h usability... yes
+
+checking arpa/inet.h presence... yes
+
+checking for arpa/inet.h... yes
+
+checking byteswap.h usability... yes
+
+checking byteswap.h presence... yes
+
+checking for byteswap.h... yes
+
+checking errno.h usability... yes
+
+checking errno.h presence... yes
+
+checking for errno.h... yes
+
+checking fcntl.h usability... yes
+
+checking fcntl.h presence... yes
+
+checking for fcntl.h... yes
+
+checking limits.h usability... yes
+
+checking limits.h presence... yes
+
+checking for limits.h... yes
+
+checking linux/serial.h usability... yes
+
+checking linux/serial.h presence... yes
+
+checking for linux/serial.h... yes
+
+checking netdb.h usability... yes
+
+checking netdb.h presence... yes
+
+checking for netdb.h... yes
+
+checking netinet/in.h usability... yes
+
+checking netinet/in.h presence... yes
+
+checking for netinet/in.h... yes
+
+checking netinet/tcp.h usability... yes
+
+checking netinet/tcp.h presence... yes
+
+checking for netinet/tcp.h... yes
+
+checking sys/ioctl.h usability... yes
+
+checking sys/ioctl.h presence... yes
+
+checking for sys/ioctl.h... yes
+
+checking sys/params.h usability... no
+
+checking sys/params.h presence... no
+
+checking for sys/params.h... no
+
+checking sys/socket.h usability... yes
+
+checking sys/socket.h presence... yes
+
+checking for sys/socket.h... yes
+
+checking sys/time.h usability... yes
+
+checking sys/time.h presence... yes
+
+checking for sys/time.h... yes
+
+checking for sys/types.h... (cached) yes
+
+checking termios.h usability... yes
+
+checking termios.h presence... yes
+
+checking for termios.h... yes
+
+checking time.h usability... yes
+
+checking time.h presence... yes
+
+checking for time.h... yes
+
+checking for unistd.h... (cached) yes
+
+checking for asciidoc... no
+
+checking for xmlto... no
+
+checking whether to build documentation... no
+
+configure: WARNING: The tools to build the documentation aren't installed
+
+checking whether __CYGWIN__ is declared... no
+
+checking for accept4... yes
+
+checking for getaddrinfo... yes
+
+checking for gettimeofday... yes
+
+checking for inet_ntoa... yes
+
+checking for select... yes
+
+checking for socket... yes
+
+checking for strerror... yes
+
+checking for strlcpy... no
+
+checking for inline... inline
+
+checking for g++... g++
+
+checking whether we are using the GNU C++ compiler... yes
+
+checking whether g++ accepts -g... yes
+
+checking dependency style of g++... gcc3
+
+checking how to run the C++ preprocessor... g++ -E
+
+checking for ld used by g++... /usr/bin/ld -m elf_x86_64
+
+checking if the linker (/usr/bin/ld -m elf_x86_64) is GNU ld... yes
+
+checking whether the g++ linker (/usr/bin/ld -m elf_x86_64) supports shared libraries... yes
+
+checking for g++ option to produce PIC... -fPIC -DPIC
+
+checking if g++ PIC flag -fPIC -DPIC works... yes
+
+checking if g++ static flag -static works... yes
+
+checking if g++ supports -c -o file.o... yes
+
+checking if g++ supports -c -o file.o... (cached) yes
+
+checking whether the g++ linker (/usr/bin/ld -m elf_x86_64) supports shared libraries... yes
+
+checking dynamic linker characteristics... (cached) GNU/Linux ld.so
+
+checking how to hardcode library paths into programs... immediate
+
+checking for int64_t... yes
+
+checking for size_t... yes
+
+checking for ssize_t... yes
+
+checking for uint16_t... yes
+
+checking for uint32_t... yes
+
+checking for uint8_t... yes
+
+checking winsock2.h usability... no
+
+checking winsock2.h presence... no
+
+checking for winsock2.h... no
+
+checking whether TIOCSRS485 is declared... yes
+
+checking whether TIOCM_RTS is declared... yes
+
+checking that generated files are newer than configure... done
+
+configure: creating ./config.status
+
+config.status: creating Makefile
+
+config.status: creating src/Makefile
+
+config.status: creating src/modbus-version.h
+
+config.status: creating src/win32/modbus.dll.manifest
+
+config.status: creating tests/Makefile
+
+config.status: creating doc/Makefile
+
+config.status: creating libmodbus.pc
+
+config.status: creating config.h
+
+config.status: config.h is unchanged
+
+config.status: creating tests/unit-test.h
+
+config.status: tests/unit-test.h is unchanged
+
+config.status: executing depfiles commands
+
+config.status: executing libtool commands
+
+ 
+
+        libmodbus 3.1.4
+
+        ===============
+
+ 
+
+        prefix:                 /usr/local
+
+        sysconfdir:             ${prefix}/etc
+
+        libdir:                 ${exec_prefix}/lib
+
+        includedir:             ${prefix}/include
+
+ 
+
+        compiler:               gcc
+
+        cflags:                 -g -O2
+
+        ldflags:               
+
+ 
+
+        documentation:          no
+
+        tests:                  yes
+
+ 
+
+Making install in src
+
+  CC       modbus.lo
+
+  CC       modbus-data.lo
+
+  CC       modbus-rtu.lo
+
+  CC       modbus-tcp.lo
+
+  CCLD     libmodbus.la
+
+/bin/mkdir -p '/usr/local/lib'
+
+/bin/bash ../libtool   --mode=install /usr/bin/install -c   libmodbus.la '/usr/local/lib'
+
+libtool: install: /usr/bin/install -c .libs/libmodbus.so.5.1.0 /usr/local/lib/libmodbus.so.5.1.0
+
+libtool: install: (cd /usr/local/lib && { ln -s -f libmodbus.so.5.1.0 libmodbus.so.5 || { rm -f libmodbus.so.5 && ln -s libmodbus.so.5.1.0 libmodbus.so.5; }; })
+
+libtool: install: (cd /usr/local/lib && { ln -s -f libmodbus.so.5.1.0 libmodbus.so || { rm -f libmodbus.so && ln -s libmodbus.so.5.1.0 libmodbus.so; }; })
+
+libtool: install: /usr/bin/install -c .libs/libmodbus.lai /usr/local/lib/libmodbus.la
+
+libtool: finish: PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin" ldconfig -n /usr/local/lib
+
+----------------------------------------------------------------------
+
+Libraries have been installed in:
+
+   /usr/local/lib
+
+ 
+
+If you ever happen to want to link against installed libraries
+
+in a given directory, LIBDIR, you must either use libtool, and
+
+specify the full pathname of the library, or use the '-LLIBDIR'
+
+flag during linking and do at least one of the following:
+
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+
+     during execution
+
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+
+     during linking
+
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+ 
+
+See any operating system documentation about shared libraries for
+
+more information, such as the ld(1) and ld.so(8) manual pages.
+
+----------------------------------------------------------------------
+
+/bin/mkdir -p '/usr/local/include/modbus'
+
+/usr/bin/install -c -m 644 modbus.h modbus-version.h modbus-rtu.h modbus-tcp.h '/usr/local/include/modbus'
+
+Making install in doc
+
+make[2]: Nothing to be done for 'install-exec-am'.
+
+Making install in tests
+
+  CC       bandwidth-server-one.o
+
+  CCLD     bandwidth-server-one
+
+  CC       bandwidth-server-many-up.o
+
+  CCLD     bandwidth-server-many-up
+
+  CC       bandwidth-client.o
+
+  CCLD     bandwidth-client
+
+  CC       random-test-server.o
+
+  CCLD     random-test-server
+
+  CC       random-test-client.o
+
+  CCLD     random-test-client
+
+  CC       unit-test-server.o
+
+  CCLD     unit-test-server
+
+  CC       unit-test-client.o
+
+  CCLD     unit-test-client
+
+  CC       version.o
+
+  CCLD     version
+
+make[2]: Nothing to be done for 'install-exec-am'.
+
+make[2]: Nothing to be done for 'install-data-am'.
+
+make[2]: Nothing to be done for 'install-exec-am'.
+
+/bin/mkdir -p '/usr/local/share/doc/libmodbus'
+
+/usr/bin/install -c -m 644 MIGRATION README.md '/usr/local/share/doc/libmodbus'
+
+/bin/mkdir -p '/usr/local/lib/pkgconfig'
+
+/usr/bin/install -c -m 644 libmodbus.pc '/usr/local/lib/pkgconfig'
+
+
+
+
+
+
+# Network
+nmcli con add type ethernet con-name eth0 ifname ens33
+sudo ifup -v ens33
+route add -net 127.0.0.0 netmask 255.0.0.0 metric 1024 dev lo
+ping www.cnn.com
+
+#SVN
+#http://alexander.holbreich.org/subversion-on-debian-linux/
+sudo apt-get install apache2-utils
+sudo apt-get install subversion
+mkdir -p /srv/svn/msm
+svnadmin create --fs-type fsfs /srv/svn/msm
+addgroup devel
+chgrp -R devel /srv/svn/msm
+chmod -R g+rw /srv/svn/msm
+chmod -R o-rwx  /srv/svn/msm
+chmod g+s /srv/svn/msm/db
+adduser dev devel
+mv /usr/bin/svnserve /usr/bin/svnserve_orig
+touch /usr/bin/svnserve
+chmod 755 /usr/bin/svnserve
+
+
+# Redis
+cd hiredis
+make
+sudo make install
+sudo mkdir /usr/include/hiredis
+sudo cp libhiredis.so /usr/lib/
+sudo cp hiredis.h /usr/include/hiredis/
+sudo cp read.h /usr/include/hiredis/
+sudo cp sds.h /usr/include/hiredis/
+sudo ldconfig
+
+#!/bin/bash
+gcc -I/usr/include/hiredis example.c -o example -lhiredis
+gcc -I/usr/include/hiredis example-doug.c -o example-doug -lhiredis
+
+
+# Lists packages that can be upgraded
+sudo apt update 
+
+sudo apt upgrade
+sudo apt install python3-pip
+
+
+
+# Desktop Ubuntu on Windows 10
+sudo do-release-upgrade -d
+
+# Shows the release version
+lsb_release -d
+
+# Valgrind
+valgrind --leak-check=yes error_log_manager
+
+# cppcheck - help find unused variables
+cppcheck --enable=all --inconclusive --std=posix .
+
+# *********************************************************
+# Docker Notes
+# *********************************************************
+https://blog.exxactcorp.com/docker-cheat-sheet-for-deep-learning-the-basics/
+
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker ps
+docker list
+docker image
+docker volume rm docker_db_data
+docker-compose up
+docker network prune
+docker-compose --version
+
+# https://dzone.com/articles/oracle-12c-image-installation-in-docker
+docker run -d -p 8080:8080 -p 1521:1521 --name OracleDB store/oracle/database-enterprise:12.2.0.1-slim
+
+# Oracle Docker
+#https://hub.docker.com/u/douglaskruger/content/sub-1d8e7e21-4d4b-42be-a94f-671b178ef44c
+# sqlplus
+# https://docs.oracle.com/cd/B14117_01/server.101/b12170/qstart.htm
+docker run -d -it --name MY_DB store/oracle/database-enterprise:12.2.0.1
+
+docker exec -it MY_DB bash -c "source /home/oracle/.bashrc; sqlplus /nolog"
+connect sys/Oradoc_db1@ORCLCDB as sysdba
+select sysdate from dual;
+SELECT * FROM v$version;
+create table a (b varchar2(20));
+drop table a;
+SELECT TABLESPACE_NAME FROM USER_TABLESPACES;
+
+
+
+
+# GIT Setup
+https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup
+git config --list --show-origin
+git config --global user.name "Doug Kruger"
+git config --global core.editor vi
+git config --list
+
+dev@msm:~/msm$ cd src
+dev@msm:~/msm/src$ git init
+Initialized empty Git repository in /export/home/dev/msm/src/.git/
+
+dev@msm:~/msm/src/lib/error_logger$ git config --global user.email "doug.kruger@gmail.com"
+dev@msm:~/msm/src/lib/error_logger$ git config --global user.email "Doug Kruger"
+dev@msm:~/msm/src/lib/error_logger$ git commit -m "Initial Version"
+[master (root-commit) 1f21a54] Initial Version
+ 5 files changed, 508 insertions(+)
+ create mode 100644 MAKE_RULES
+ create mode 100644 Makefile
+ create mode 100644 error_logger.h
+ create mode 100644 error_logger_private.h
+ create mode 100644 lib_error_logger.c
+
